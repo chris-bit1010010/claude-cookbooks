@@ -10,12 +10,12 @@ Features:
 - Idempotent with state persistence
 """
 
-import json
-import subprocess
-from pathlib import Path
-from datetime import datetime
-import os
 import argparse
+import json
+import os
+import subprocess
+from datetime import datetime
+from pathlib import Path
 
 
 class NotebookValidator:
@@ -114,10 +114,11 @@ class NotebookValidator:
             "claude-3-5-sonnet-latest": "claude-sonnet-4-5",
             "claude-3-haiku-20240307": "claude-haiku-4-5",
             "claude-3-5-haiku-20241022": "claude-haiku-4-5",
-            "claude-3-opus-20240229": "claude-opus-4-1",
-            "claude-3-opus-latest": "claude-opus-4-1",
+            "claude-3-opus-20240229": "claude-opus-4-5",
+            "claude-3-opus-latest": "claude-opus-4-5",
             "claude-sonnet-4-20250514": "claude-sonnet-4-5",
-            "claude-opus-4-20250514": "claude-opus-4-1",
+            "claude-opus-4-20250514": "claude-opus-4-5",
+            "claude-opus-4-1": "claude-opus-4-5",
         }
 
         for i, cell in enumerate(nb.get("cells", [])):
@@ -197,7 +198,8 @@ class NotebookValidator:
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, timeout=130, text=True)
+            # subprocess.run with shell=False is safe here as cmd is fully controlled
+            result = subprocess.run(cmd, capture_output=True, timeout=130, text=True)  # noqa: S603
             if result.returncode == 0:
                 return {"success": True}
             else:
@@ -265,7 +267,7 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
         warning_issues = []
         info_issues = []
 
-        for issue_type, notebooks in issues_by_type.items():
+        for _issue_type, notebooks in issues_by_type.items():
             for path, issue in notebooks:
                 if issue["severity"] == "critical":
                     critical_issues.append((path, issue))
@@ -296,7 +298,7 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
             dashboard += f"\n🟡 Warnings ({len(warning_issues)})\n"
             # Group warnings by type
             warning_types = {}
-            for path, issue in warning_issues:
+            for _path, issue in warning_issues:
                 wtype = issue["type"]
                 if wtype not in warning_types:
                     warning_types[wtype] = 0
@@ -344,8 +346,8 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
         # Build markdown
         markdown = f"""## 📊 Notebook Validation Report
 
-**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M")}  
-**Status:** {passing}/{total} notebooks passing ({percentage:.1f}%)  
+**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M")}
+**Status:** {passing}/{total} notebooks passing ({percentage:.1f}%)
 """
 
         # Add progress bar
@@ -642,10 +644,11 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
                 "claude-3-5-sonnet-latest": "claude-sonnet-4-5",
                 "claude-3-haiku-20240307": "claude-haiku-4-5",
                 "claude-3-5-haiku-20241022": "claude-haiku-4-5",
-                "claude-3-opus-20240229": "claude-opus-4-1",
-                "claude-3-opus-latest": "claude-opus-4-1",
+                "claude-3-opus-20240229": "claude-opus-4-5",
+                "claude-3-opus-latest": "claude-opus-4-5",
                 "claude-sonnet-4-20250514": "claude-sonnet-4-5",
-                "claude-opus-4-20250514": "claude-opus-4-1",
+                "claude-opus-4-20250514": "claude-opus-4-5",
+                "claude-opus-4-1": "claude-opus-4-5",
             }
 
             modified = False

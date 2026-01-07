@@ -9,10 +9,10 @@ dependencies = [
     "numpy>=2.3.4",
     "pandas>=2.3.3",
     "jupyter>=1.1.1",
+    "rich>=14.2.0",
+    "python-dotenv>=1.2.1",
     "voyageai>=0.3.5",
 ]
-
-[tool.uv.sources]
 
 [build-system]
 requires = ["hatchling"]
@@ -24,7 +24,10 @@ dev = [
     "pytest>=8.3.3",
     "nbval>=0.11.0",
     "pre-commit>=3.8.0",
-    "nbconvert>=7.16.0", 
+    "nbconvert>=7.16.0",
+    "pyyaml>=6.0.3",
+    "tox>=4.32.0",
+    "tox-uv>=1.29.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -41,7 +44,13 @@ indent-style = "space"
 line-ending = "auto"
 
 [tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "S", "B"]
 ignore = [
+    "E501",   # line too long
+    "S101",   # assert used (ok in tests)
+    "S301",   # pickle usage ok for local data in cookbooks
+    "S311",   # pseudo-random generators ok for non-crypto
+    "S608",   # SQL string construction ok for demo/educational code
     "N806",   # variable in function should be lowercase (allow for API responses)
 ]
 
@@ -52,5 +61,22 @@ ignore = [
     "F811",   # redefinitions (common in notebooks)
     "N803",   # argument name should be lowercase
     "N806",   # variable in function should be lowercase
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (requires notebook execution)",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
 ]
 
